@@ -1,1 +1,0 @@
-// Shared device state
