@@ -46,13 +46,34 @@ const int deviceCount = sizeof(devices)/sizeof(devices[0]);
 
 
 void initDevices(){
+    for (int i = 0; i < deviceCount; i++) {
+    devices[i]->init();
+  }
 } 
 
 void handleMessage(char message[], String topic){
+  char buffer[21];
+  for (int i = 0; i < deviceCount; i++) {
+    devices[i]->getTopic(buffer, sizeof(buffer));
+    if(topic.equals(buffer)){
+      devices[i]->handleMessage(message);
+      break;
+    }
+  }
 }
 
 void makeDataReadings(MqttClient mqttClient){
+  for (int i = 0; i < deviceCount; i++) {
+    int data = devices[i]->getReading();
+    if(data != -1){ 
+      Serial.println(data);
+    }
+  }
 }
 
 void registerDevices(MqttClient mqttClient){
+    char buffer[128]; 
+  for (int i = 0; i < deviceCount; i++) {
+    devices[i]->getRegistration(buffer);
+  }
 }
