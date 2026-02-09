@@ -22,6 +22,27 @@ void binaryReciver(const char* msg, int pin){
   }
 }
 
+DigitalSensorDevice motion( 2, "motion");
+DigitalSensorDevice button1(4, "button");
+DigitalSensorDevice button2( 8, "button");
+
+AnalogSensorDevice gas( A0, "gas");
+AnalogSensorDevice photo( A1, "photo");
+AnalogSensorDevice steam( A2, "steam");
+AnalogSensorDevice humidity( A3, "humidity");
+
+ReciverDevice buzzer( 3, "buzz", playMusic);
+ReciverDevice light1( 13, "light", binaryReciver);
+ReciverDevice light2( 5, "light", binaryReciver);
+
+FanDevice fan( 6, 7);
+ServoDevice window( 10);
+ServoDevice door( 9);
+LcdDevice screen( -1);
+
+Device* devices[] = {&light1, &light2, &buzzer, &fan, &window, &door, &screen, &photo, &motion, &steam, &humidity, &gas, &button1, &button2};
+
+const int deviceCount = sizeof(devices)/sizeof(devices[0]);
 
 
 void initDevices(){
