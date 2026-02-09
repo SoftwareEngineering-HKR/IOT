@@ -1,5 +1,6 @@
 #include "device.h"
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 namespace{
   void genFakeMac(uint8_t mac[6]){
@@ -25,4 +26,12 @@ void Device::init(){
 }
 
 void Device::getRegistration(char* buffer){
+  int val = this->getReading();
+  bool sensor = val != -1;
+  StaticJsonDocument<128> doc;
+  doc["id"] = mac;
+  doc["type"] = type;
+  doc["maxVal"] = maxVal;
+  doc["sensor"] = sensor;
+  serializeJson(doc, buffer, sizeof(buffer));
 }
