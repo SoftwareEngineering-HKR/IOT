@@ -34,3 +34,13 @@ TiltDevice    tiltDev(TILT_PIN);
 // Array of device pointers for easy iteration
 Device* myDevices[] = {&tempDev, &humDev, &lightDev, &tiltDev};
 const int deviceCount = sizeof(myDevices) / sizeof(myDevices[0]);
+
+void connectWiFi() {
+  Serial.print("Connecting to Wi-Fi");
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(1000);
+  }
+  Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
+}
