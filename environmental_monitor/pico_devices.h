@@ -45,3 +45,16 @@ public:
     return (int)(((float)raw / 65535.0) * 100.0); //ADC is 16-bit on Pico W
   }
 };
+class TiltDevice : public Device {
+public:
+  TiltDevice(int pin) : Device("tilt", pin, 1) {}
+  
+  void init() override {
+    WiFi.macAddress(this->mac);
+  }
+  
+  int getReading() override {
+    // Active LOW sensor
+    return (digitalRead(pin) == LOW) ? 1 : 0;
+  }
+};
