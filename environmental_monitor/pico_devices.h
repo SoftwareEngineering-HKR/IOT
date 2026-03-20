@@ -32,3 +32,16 @@ public:
     return isnan(h) ? -1 : (int)h;
   }
 };
+class LightDevice : public Device {
+public:
+  LightDevice(int pin) : Device("light", pin, 100) {} // We'll convert raw ADC to percentage
+  
+  void init() override {
+    WiFi.macAddress(this->mac);
+  }
+  
+  int getReading() override {
+    uint16_t raw = analogRead(pin);
+    return (int)(((float)raw / 65535.0) * 100.0); //ADC is 16-bit on Pico W
+  }
+};
