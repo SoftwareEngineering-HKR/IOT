@@ -44,3 +44,23 @@ void connectWiFi() {
   }
   Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
 }
+
+void discoverServer() {
+  Serial.println("Broadcasting UDP to discover server...");
+  udp.begin(UDP_PORT);
+  
+  while (!serverFound) {
+    udp.beginPacket(IPAddress(255, 255, 255, 255), UDP_PORT);
+    udp.print("DISCOVER_SERVER"); 
+    udp.endPacket();
+    
+    delay(2000);
+    int packetSize = udp.parsePacket();
+    if (packetSize) {
+      serverIP = udp.remoteIP();
+      serverFound = true;
+      Serial.println("Server discovered at: " + serverIP.toString());
+    }
+  }
+  udp.stop();
+}
