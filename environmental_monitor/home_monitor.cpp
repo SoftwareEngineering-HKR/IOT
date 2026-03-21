@@ -82,3 +82,30 @@ void connectMQTTAndRegister() {
     mqttClient.endMessage();
   }
 }
+void checkAndAlertDiscord(int t, int h, int l, int tilt) {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  bool tempAlert  = (t != -1 && t > TEMP_THRESHOLD);
+  bool humAlert   = (h != -1 && h > HUMIDITY_THRESHOLD);
+  bool lightAlert = (l != -1 && l < LIGHT_THRESHOLD);
+  bool tiltAlert  = (tilt == 1);
+
+  if (!tempAlert && !humAlert && !lightAlert && !tiltAlert) return;
+
+  String msg = "EMERGENCY ALERT! Temp: " + (t == -1 ? String("N/A") : String(t) + "C") + 
+               ", Hum: " + (h == -1 ? String("N/A") : String(h) + "%") + 
+               ", Light: " + String(l) + "%, Tilt: " + (tilt ? "Tilted" : "Safe");
+
+  String payload = "{\"content\": \"" + msg + "\"}";
+
+  WiFiClientSecure client;
+  client.setInsecure(); 
+  HTTPClient http;
+  
+  http.begin(client, DISCORD_WEBHOOK_URL);
+  http.addHeader("Content-Type", "application/json");
+  
+  int code = http.POST(payload);
+  if (code > 0 && code / 100 == 2) Serial.println("Emergency alert sent to Discord!");
+  http.end();
+}
