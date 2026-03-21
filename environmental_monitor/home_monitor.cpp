@@ -64,3 +64,21 @@ void discoverServer() {
   }
   udp.stop();
 }
+void connectMQTTAndRegister() {
+  Serial.print("Connecting to MQTT broker...");
+  if (!mqttClient.connect(serverIP, 1883)) {
+    Serial.println("Failed! Error code = " + String(mqttClient.connectError()));
+    return;
+  }
+  Serial.println("Connected!");
+
+  // Use the `getRegistration` method from the Device class
+  char buffer[128];
+  for (int i = 0; i < deviceCount; i++) {
+    myDevices[i]->getRegistration(buffer);
+    
+    mqttClient.beginMessage("registration");
+    mqttClient.print(buffer);
+    mqttClient.endMessage();
+  }
+}
