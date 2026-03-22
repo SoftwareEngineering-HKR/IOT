@@ -109,3 +109,22 @@ void checkAndAlertDiscord(int t, int h, int l, int tilt) {
   if (code > 0 && code / 100 == 2) Serial.println("Emergency alert sent to Discord!");
   http.end();
 }
+void setup() {
+  Serial.begin(115200);
+  delay(2000);
+
+  pinMode(TILT_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+  analogReadResolution(16);
+  
+  dhtSensor.begin();
+
+  // Initialize all devices
+  for (int i = 0; i < deviceCount; i++) {
+    myDevices[i]->init();
+  }
+
+  connectWiFi();
+  discoverServer();
+  connectMQTTAndRegister();
+}
