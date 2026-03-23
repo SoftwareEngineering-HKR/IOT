@@ -128,3 +128,40 @@ void setup() {
   discoverServer();
   connectMQTTAndRegister();
 }
+void loop() {
+  if (serverFound && !mqttClient.connected()) {
+    connectMQTTAndRegister();
+  }
+  if (serverFound && mqttClient.connected()) {
+    mqttClient.poll();
+  }
+
+  unsigned long now = millis();
+  if (now - lastUpdate >= UPDATE_INTERVAL) {
+    lastUpdate = now;
+
+    for (int i = 0; i < deviceCount; i++) {
+      int reading = myDevices[i]->getReading();
+      
+      if (reading != -1) {
+        char topicBuf[64];
+        myDevices[i]->getTopic(topicBuf, sizeof(topicBuf));
+        
+        mqttClient.beginMessage(topicBuf);
+        mqttClient.print(reading);
+        mqttClient.endMessage();
+        
+        Serial.println("Published to " + String(topicBuf) + ": " + String(reading));
+      }
+    }
+
+    // Capture variables for Discord and LED check
+    int t    = tempDev.getReading();
+    int h    = humDev.getReading();
+    int l    = lightDev.getReading();
+    int tilt = tiltDev.getReading();
+
+    digitalWrite(LED_PIN, tilt == 1 ? HIGH : LOW);
+    checkAndAlertDiscord(t, h, l, tilt);
+  }
+}
