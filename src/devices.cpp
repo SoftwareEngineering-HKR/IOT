@@ -70,9 +70,9 @@ void ServoDevice::init(){
 }
 
 void ServoDevice::handleMessage(const char *msg){
-  if(strcmp(msg, "open") == 0){
+  if(strcmp(msg, "1") == 0){
       servo.write(180);
-  }else if (strcmp(msg, "close") == 0){
+  }else if (strcmp(msg, "0") == 0){
       servo.write(0);
   }
 }
