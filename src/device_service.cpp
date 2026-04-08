@@ -15,9 +15,9 @@ void playMusic(const char* msg, int pin) {
 };
 
 void binaryReciver(const char* msg, int pin){
-  if(strcmp(msg, "on") == 0){
+  if(strcmp(msg, "1") == 0){
     digitalWrite(pin, HIGH);
-  }else if (strcmp(msg, "off") == 0){
+  }else if (strcmp(msg, "0") == 0){
     digitalWrite(pin, LOW);
   }
 }
@@ -44,14 +44,9 @@ Device* devices[] = {&light1, &light2, &buzzer, &fan, &window, &door, &screen, &
 
 const int deviceCount = sizeof(devices)/sizeof(devices[0]);
 
+char buffer[64];
 
-void initDevices(){
-    for (int i = 0; i < deviceCount; i++) {
-    devices[i]->init();
-  }
-} 
-
-void handleMessage(char message[], String topic){
+void handleDeviceCommand(char message[], String topic){
   char buffer[21];
   for (int i = 0; i < deviceCount; i++) {
     devices[i]->getTopic(buffer, sizeof(buffer));
@@ -62,18 +57,81 @@ void handleMessage(char message[], String topic){
   }
 }
 
-void makeDataReadings(MqttClient mqttClient){
-  for (int i = 0; i < deviceCount; i++) {
-    int data = devices[i]->getReading();
-    if(data != -1){ 
-      Serial.println(data);
+int handleIncoming(){
+  char* topic = strtok(buffer, ":");
+  char* message = strtok(NULL, ":");
+
+  if(strcmp(topic, "cmd") == 0){
+    registerDevices();
+    return 1;
+  }else{
+    handleDeviceCommand(message, topic);
+    return 0;
+  }
+}
+
+void readSerial(){
+  int len = Serial.readBytesUntil('\n', buffer, sizeof(buffer) - 1);
+  buffer[len] = '\0'; 
+}
+
+int awaitAck() {
+
+  while(true){
+    readSerial();
+    if (strcmp(buffer, "ACK") == 0){
+      return 0;
+    }
+    if(handleIncoming() == 1){
+      return 1;
     }
   }
 }
 
-void registerDevices(MqttClient mqttClient){
-    char buffer[128]; 
+
+void handleMessage(){
+  readSerial();
+  handleIncoming();
+}
+
+
+void makeDataReadings(){
+  char topic[22];
+  char buffer[128];
   for (int i = 0; i < deviceCount; i++) {
-    devices[i]->getRegistration(buffer);
+    int data = devices[i]->getReading();
+    if(data != -1) {
+      devices[i]->getTopic(topic, sizeof(topic));
+      int n = snprintf(buffer, sizeof(buffer), "%s:%d\n", topic, data);
+      Serial.write(buffer, n);
+      if (awaitAck() == 1){
+        return;
+      } 
+    }
+  }
+}
+
+void subDevice(Device* device, char* buffer) {
+  if (device->getReading() == -1) {
+    device->getTopic(buffer, 21);
+    Serial.println(buffer);
+  }
+}
+
+void registerDevices(){
+  char topic[21];
+
+  for (int i = 0; i < deviceCount; i++) {
+    devices[i]->getRegistration(Serial);
+    awaitAck();
+    subDevice(devices[i], topic);
+  }
+  Serial.println("DONE");
+  awaitAck();
+}
+
+void initDevices(){
+  for (int i = 0; i < deviceCount; i++) {
+    devices[i]->init();
   }
 }
