@@ -3,6 +3,7 @@
 #include <ArduinoJson.h>
 
 namespace{
+  char macBuffer[13];
   void genFakeMac(uint8_t mac[6]){
     mac[0] = 0x02;
     for (int i = 1; i < 6; i++){
@@ -24,7 +25,6 @@ namespace{
     }
     buffer[j] = '\0';
   }
-
 }
 
 Device::Device(const char* type, int pin, int maxVal){
@@ -35,7 +35,6 @@ Device::Device(const char* type, int pin, int maxVal){
 }
 
 void Device::getTopic(char* buffer, size_t size){
-  char macBuffer[13];
   macToString(mac, macBuffer);
   snprintf(buffer, size, "%s/%s", type, macBuffer);
 }
@@ -44,13 +43,19 @@ void Device::init(){
   genFakeMac(this->mac);
 }
 
-void Device::getRegistration(char* buffer){
+void Device::getRegistration(Print &ser){
   int val = this->getReading();
   bool sensor = val != -1;
-  StaticJsonDocument<128> doc;
-  doc["id"] = mac;
+  macToString(mac, macBuffer);
+
+  JsonDocument doc;
+  doc["id"] = macBuffer;
   doc["type"] = type;
   doc["maxVal"] = maxVal;
+  doc["minVal"] = 0;
   doc["sensor"] = sensor;
-  serializeJson(doc, buffer, sizeof(buffer));
+
+  ser.print("register:");
+  serializeJson(doc, ser);
+  ser.println();
 }

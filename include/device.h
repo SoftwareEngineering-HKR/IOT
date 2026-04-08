@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 #include <string.h>
+#include <Arduino.h>
+
 
 class Device{
   protected:
@@ -13,7 +15,7 @@ class Device{
     Device(const char* type, int pin, int maxVal); // constructor
     
     void getTopic(char* buffer, size_t size); // get the topic for the device
-    void getRegistration(char* buffer); // the registration pay load
+    void getRegistration(Print &ser); // the registration pay load
 
     virtual void handleMessage(const char* msg) {}; // handle mqtt message 
     virtual int getReading() {return -1;}; // get readin from sensor
