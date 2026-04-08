@@ -122,7 +122,9 @@ void registerDevices(){
   char topic[21];
 
   for (int i = 0; i < deviceCount; i++) {
+    Serial.print("register:");
     devices[i]->getRegistration(Serial);
+    Serial.println();
     awaitAck();
     subDevice(devices[i], topic);
   }

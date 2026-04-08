@@ -55,7 +55,5 @@ void Device::getRegistration(Print &ser){
   doc["minVal"] = 0;
   doc["sensor"] = sensor;
 
-  ser.print("register:");
   serializeJson(doc, ser);
-  ser.println();
 }
