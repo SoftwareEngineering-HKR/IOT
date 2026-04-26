@@ -18,3 +18,11 @@
 #define TILT_PIN 12
 #define LED_PIN 13
 
+// -----------------------------------------------------------------------------
+// ESP32-S3 Super Mini hardware mapping
+// RC522 and VL53L0X share the same I2C bus
+// -----------------------------------------------------------------------------
+#define BOARD_LED_PIN 8
+
+#define I2C_SDA_PIN 5
+#define I2C_SCL_PIN 6
