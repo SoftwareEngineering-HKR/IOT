@@ -15,4 +15,37 @@
 #define C3_LED_PIN BOARD_LED_PIN
 
 VL53L0X lidar;
-MFRC522 rfid(RC522_I2C_ADDRESS, RC522_RST_PIN);   // RC522_RST_PIN may remain -1, like your working code.
+MFRC522 rfid(RC522_I2C_ADDRESS, RC522_RST_PIN);   // RC522_RST_PIN may remain -1, 
+
+
+inline void assignDerivedMac(uint8_t mac[6], uint8_t offset) {
+  WiFi.macAddress(mac);
+  mac[5] = (uint8_t)(mac[5] + offset);
+  if (mac[5] == 0x00) mac[5] = offset;
+}
+
+class LidarDevice : public Device {
+public:
+  LidarDevice(int pin) : Device("photo", pin, LIDAR_MAX_VALUE) {}
+
+  void init() override {
+    assignDerivedMac(this->mac, 1);
+
+    lidar.setTimeout(500);
+    if (!lidar.init()) {
+      Serial.println("[lidar] Failed to detect and initialize VL53L0X");
+    } else {
+      lidar.startContinuous();
+      Serial.println("[lidar] VL53L0X ready");
+    }
+  }
+
+  int getReading() override {
+    int distance = lidar.readRangeContinuousMillimeters();
+    if (lidar.timeoutOccurred() || distance < LIDAR_MIN_VALUE || distance > LIDAR_MAX_VALUE) {
+      return -1;
+    }
+    return distance;
+  }
+};
+
