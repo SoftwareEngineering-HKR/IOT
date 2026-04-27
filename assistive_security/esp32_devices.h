@@ -49,3 +49,13 @@ public:
   }
 };
 
+class RadarDevice : public Device {
+public:
+  struct TargetInfo {
+    bool valid = false;
+    int16_t x_mm = 0;
+    int16_t y_mm = 0;
+    int16_t speed_cms = 0;
+    uint16_t resolution_mm = 0;
+    uint16_t distance_mm = 0;
+  };
