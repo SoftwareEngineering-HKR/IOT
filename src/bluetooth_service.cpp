@@ -4,18 +4,31 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+#include <BLEClient.h>
+#include <BLEScan.h>
+#include <BLEAdvertisedDevice.h>
 
 #define SERVICE_UUID        "12345678-1234-5678-1234-56789abcdef0"
 #define CHARACTERISTIC_UUID "12345678-1234-5678-1234-56789abcdef1"
 
 static BluetoothService* instance = nullptr;
 
+// ===== SERVER =====
 static BLECharacteristic* characteristic;
 static bool deviceConnected = false;
 
+// ===== CLIENT =====
+static BLEClient* client = nullptr;
+static BLERemoteCharacteristic* remoteCharacteristic = nullptr;
+static BLEAdvertisedDevice* foundDevice = nullptr;
+
+static bool clientConnected = false;
+
+// ===== HEARTBEAT =====
 static unsigned long lastPing = 0;
 static unsigned long lastPong = 0;
 
+// ================= SERVER CALLBACKS =================
 class ServerCallbacks : public BLEServerCallbacks {
   void onConnect(BLEServer* pServer) override {
     deviceConnected = true;
@@ -29,6 +42,7 @@ class ServerCallbacks : public BLEServerCallbacks {
   }
 };
 
+// ================= CHARACTERISTIC CALLBACKS =================
 class CharacteristicCallbacks : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* pChar) override {
     std::string rx = std::string(pChar->getValue().c_str());
@@ -39,42 +53,82 @@ class CharacteristicCallbacks : public BLECharacteristicCallbacks {
 
     if (!instance) return;
 
-
     if (msg == "rdy") {
-      Serial.println("[BLE] rdy received → sending register");
-
       String json =
         "{\"type\":\"register\","
         "\"deviceType\":\"light\","
         "\"maxVal\":1,\"minVal\":0,"
         "\"sensor\":false}";
-
       instance->sendRegister(json.c_str());
     }
-
     else if (msg == "reg") {
       Serial.println("[BLE] registered successfully");
     }
-
     else if (msg.startsWith("set;")) {
-      Serial.println("[BLE] set command received");
-
-      // Forward raw command to user system if needed
       instance->onMessage((char*)msg.c_str());
     }
-
     else if (msg == "pong") {
-      Serial.println("[BLE] pong received");
       lastPong = millis();
     }
   }
 };
 
+// ================= SCAN CALLBACK =================
+class AdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
+  void onResult(BLEAdvertisedDevice advertisedDevice) override {
+    std::string name = advertisedDevice.getName();
+
+    if (name.find("SE-HKR") != std::string::npos) {
+      Serial.print("[BLE] Found: ");
+      Serial.println(name.c_str());
+
+      foundDevice = new BLEAdvertisedDevice(advertisedDevice);
+      BLEDevice::getScan()->stop();
+    }
+  }
+};
+
+// ================= CLIENT CONNECT =================
+bool connectToServer() {
+  if (!foundDevice) return false;
+
+  client = BLEDevice::createClient();
+
+  Serial.println("[BLE] Connecting...");
+
+  if (!client->connect(foundDevice)) {
+    Serial.println("[BLE] Connection failed");
+    return false;
+  }
+
+  BLERemoteService* service = client->getService(SERVICE_UUID);
+  if (!service) {
+    client->disconnect();
+    return false;
+  }
+
+  remoteCharacteristic = service->getCharacteristic(CHARACTERISTIC_UUID);
+  if (!remoteCharacteristic) {
+    client->disconnect();
+    return false;
+  }
+
+  Serial.println("[BLE] Connected to SE-HKR");
+  clientConnected = true;
+
+  delete foundDevice;
+  foundDevice = nullptr;
+
+  return true;
+}
+
+// ================= INIT =================
 void BluetoothService::init() {
   instance = this;
 
   BLEDevice::init("ESP32_LIGHT");
 
+  // ===== SERVER =====
   BLEServer* server = BLEDevice::createServer();
   server->setCallbacks(new ServerCallbacks());
 
@@ -92,54 +146,68 @@ void BluetoothService::init() {
 
   service->start();
 
-  BLEAdvertising* advertising = BLEDevice::getAdvertising();
-  advertising->start();
+  BLEDevice::getAdvertising()->start();
 
-  Serial.println("[BLE] Service started, advertising...");
+  // ===== SCAN =====
+  BLEScan* scan = BLEDevice::getScan();
+  scan->setAdvertisedDeviceCallbacks(new AdvertisedDeviceCallbacks());
+  scan->setActiveScan(true);
+  scan->start(0, false); // continuous scan
+
+  Serial.println("[BLE] Init done, scanning...");
 }
 
+// ================= LOOP =================
 void BluetoothService::loop() {
+
+  // ===== AUTO CONNECT =====
+  if (!clientConnected && foundDevice) {
+    if (!connectToServer()) {
+      Serial.println("[BLE] Retry scan...");
+      BLEDevice::getScan()->start(0, false);
+    }
+  }
+
+  // detect disconnect
+  if (clientConnected && client && !client->isConnected()) {
+    Serial.println("[BLE] Client lost → rescanning");
+    clientConnected = false;
+    remoteCharacteristic = nullptr;
+    BLEDevice::getScan()->start(0, false);
+  }
+
+  // ===== SERVER HEARTBEAT =====
   if (!deviceConnected) return;
 
   unsigned long now = millis();
 
   if (now - lastPing > 15000) {
     String ping = "{\"type\":\"ping\"}";
-
     characteristic->setValue(ping.c_str());
     characteristic->notify();
-
-    Serial.println("[BLE] ping sent");
-
     lastPing = now;
   }
 
   if (now - lastPong > 30000) {
-    Serial.println("[BLE] pong timeout → restarting BLE");
-
     BLEDevice::deinit(true);
     delay(500);
     ESP.restart();
   }
 }
 
+// ================= API =================
 bool BluetoothService::connected() {
   return deviceConnected;
 }
 
-
 void BluetoothService::sendRegister(const char* json) {
   if (!characteristic) return;
-
   characteristic->setValue(json);
   characteristic->notify();
-
-  Serial.println("[BLE] register sent");
 }
 
 void BluetoothService::sendPing() {
   if (!characteristic) return;
-
   const char* ping = "{\"type\":\"ping\"}";
   characteristic->setValue(ping);
   characteristic->notify();
@@ -147,11 +215,12 @@ void BluetoothService::sendPing() {
 
 void BluetoothService::sendValue(const char* topic, const char* msg) {
   if (!characteristic) return;
-
-  String payload = String(msg);
-
-  characteristic->setValue(payload.c_str());
+  characteristic->setValue(msg);
   characteristic->notify();
+}
 
-  Serial.println("[BLE] value sent");
+void BluetoothService::sendToRemote(const char* msg) {
+  if (remoteCharacteristic && clientConnected) {
+    remoteCharacteristic->writeValue((uint8_t*)msg, strlen(msg));
+  }
 }
