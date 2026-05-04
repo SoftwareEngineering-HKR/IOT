@@ -12,5 +12,8 @@ public:
   void sendPing();
   void sendValue(const char* topic, const char* msg);
 
+  // don't know if this is needed, needs to be tested
+  // void sendToRemote(const char* msg); 
+
   void onMessage(char* msg) {}
 };
