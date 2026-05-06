@@ -433,3 +433,47 @@ bool connectMqttAndRegister() {
   );
 
   
+
+  mqttClient.setId(clientId);
+
+  Serial.print("[mqtt] Connecting to ");
+  Serial.print(serverIP);
+  Serial.print(":");
+  Serial.println(MQTT_BROKER_PORT);
+
+  if (!mqttClient.connect(serverIP, MQTT_BROKER_PORT)) {
+    Serial.print("[mqtt] Connect failed, error=");
+    Serial.println(mqttClient.connectError());
+    return false;
+  }
+
+  Serial.println("[mqtt] Connected");
+  Serial.println("[mqtt] Registering backend devices...");
+
+  registerAllDevicesForBackend();
+
+  Serial.println("[mqtt] Registration sent");
+
+  rfidDoorOpen = false;
+  rfidDoorOpenUntil = 0;
+  currentRfidValue = 0;
+
+  return true;
+}
+
+// -----------------------------------------------------------------------------
+// Arduino setup / loop
+// -----------------------------------------------------------------------------
+void setup() {
+  // Serial.begin(115200);
+  // delay(1000);
+
+  Serial.begin(115200);
+  delay(3000);
+
+  Serial.println();
+  Serial.println("================================");
+  Serial.println("ESP32 BOOT TEST - FIRMWARE RUNNING");
+  Serial.println("================================");
+
+  
