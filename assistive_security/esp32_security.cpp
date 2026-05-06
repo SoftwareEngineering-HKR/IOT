@@ -385,3 +385,51 @@ void discoverServer() {
 
           Serial.print("[server] UDP response: ");
           Serial.println(response);
+          
+
+          if (strcmp(response, UDP_DISCOVERY_RESPONSE) == 0) {
+            serverIP = udp.remoteIP();
+            serverFound = true;
+
+            Serial.print("[server] Discovered backend IP: ");
+            Serial.println(serverIP);
+            break;
+          }
+        }
+      }
+
+      delay(10);
+    }
+  }
+
+  udp.stop();
+#endif
+}
+
+bool connectMqttAndRegister() {
+  if (!serverFound) {
+    Serial.println("[mqtt] Cannot connect: server IP not found");
+    return false;
+  }
+
+  if (mqttClient.connected()) {
+    return true;
+  }
+
+  uint8_t mac[6];
+  WiFi.macAddress(mac);
+
+  char clientId[40];
+  snprintf(
+    clientId,
+    sizeof(clientId),
+    "esp32s3-%02X%02X%02X%02X%02X%02X",
+    mac[0],
+    mac[1],
+    mac[2],
+    mac[3],
+    mac[4],
+    mac[5]
+  );
+
+  
