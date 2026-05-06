@@ -110,3 +110,61 @@ public:
   }
 
   
+
+  int getReading() override {
+    int distance = lidar.readRangeContinuousMillimeters();
+
+    if (lidar.timeoutOccurred() || distance < LIDAR_MIN_VALUE || distance > LIDAR_MAX_VALUE) {
+      return -1;
+    }
+
+    return distance;
+  }
+};
+
+// -----------------------------------------------------------------------------
+// LD2450 Radar
+// -----------------------------------------------------------------------------
+// IMPORTANT: this keeps your original pin order. No auto swap.
+// The firmware calls:
+//   Serial1.begin(LD2450_BAUD_RATE, SERIAL_8N1, LD2450_RX_PIN, LD2450_TX_PIN)
+// through the values passed from esp32_security.cpp.
+#ifndef RADAR_FRAME_STALE_TIMEOUT_MS
+#define RADAR_FRAME_STALE_TIMEOUT_MS 750UL
+#endif
+
+#ifndef RADAR_DEBUG_PRINT_MS
+#define RADAR_DEBUG_PRINT_MS 2000UL
+#endif
+
+class RadarDevice : public SecurityDevice {
+public:
+  struct TargetInfo {
+    bool valid = false;
+    int16_t x_mm = 0;
+    int16_t y_mm = 0;
+    int16_t speed_cms = 0;
+    uint16_t resolution_mm = 0;
+    uint16_t distance_mm = 0;
+  };
+
+private:
+  static const int FRAME_LEN = 30;
+  static const int TARGETS = 3;
+  static const int RAW_SAMPLE_LEN = 64;
+
+  int ld2450RxPin;
+  int ld2450TxPin;
+
+  uint8_t frame[FRAME_LEN];
+  size_t frameIndex = 0;
+
+  TargetInfo targets[TARGETS];
+  int targetCount = 0;
+  uint16_t nearestDistance = 0;
+
+  unsigned long lastFrameAt = 0;
+  unsigned long lastDebugPrintAt = 0;
+  bool hasReceivedFrame = false;
+
+  
