@@ -124,3 +124,43 @@ void printTableHeaderOnce() {
 
   printed = true;
 }
+
+
+void printSensorTableRow() {
+  printTableHeaderOnce();
+
+  Serial.printf(
+    "| %-4d | %-8d | %-14d | %-17d | %-15d | %-12s |\n",
+    currentRfidValue,
+    currentLidarMm,
+    currentRadarPresence,
+    currentRadarDistanceMm,
+    currentRadarSpeedCms,
+    radarMotionText(currentRadarSpeedCms, currentRadarPresence)
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Backend registration
+// -----------------------------------------------------------------------------
+void publishRegisterPayload(const char* id, const char* type, int maxVal, int minVal, bool sensor) {
+  
+  
+  JsonDocument doc;
+  doc["id"] = id;
+  doc["type"] = type;
+  doc["maxVal"] = maxVal;
+  doc["minVal"] = minVal;
+  doc["sensor"] = sensor;
+
+  char buffer[160];
+  serializeJson(doc, buffer, sizeof(buffer));
+
+  mqttClient.beginMessage("register");
+  mqttClient.print(buffer);
+  bool ok = mqttClient.endMessage();
+
+  Serial.print("[register] ");
+  Serial.print(buffer);
+  Serial.println(ok ? " OK" : " FAILED");
+}
