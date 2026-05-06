@@ -232,4 +232,70 @@ private:
       return false;
     }
 
-    
+
+    if (frameIndex == 2) {
+      if (b == 0x03) {
+        frame[2] = b;
+        frameIndex = 3;
+      } else {
+        restartFrameParserWithByte(b);
+      }
+      return false;
+    }
+
+    if (frameIndex == 3) {
+      if (b == 0x00) {
+        frame[3] = b;
+        frameIndex = 4;
+      } else {
+        restartFrameParserWithByte(b);
+      }
+      return false;
+    }
+
+    frame[frameIndex++] = b;
+
+    if (frameIndex < FRAME_LEN) {
+      return false;
+    }
+
+    bool validFrame = frame[28] == 0x55 && frame[29] == 0xCC;
+    resetFrameParser();
+
+    if (!validFrame) {
+      badFramesSeen++;
+      restartFrameParserWithByte(b);
+      return false;
+    }
+
+    framesSeen++;
+    return true;
+  }
+
+  void parseFrame() {
+    clearTargets();
+
+    for (int i = 0; i < TARGETS; i++) {
+      int base = 4 + i * 8;
+
+      int16_t x = decodeSignedMag16(frame[base + 0], frame[base + 1]);
+      int16_t y = decodeSignedMag16(frame[base + 2], frame[base + 3]);
+      int16_t speed = decodeSignedMag16(frame[base + 4], frame[base + 5]);
+      uint16_t resolution = ((uint16_t)frame[base + 7] << 8) | frame[base + 6];
+      uint16_t distance = (uint16_t)sqrtf((float)x * (float)x + (float)y * (float)y);
+
+      targets[i].x_mm = x;
+      targets[i].y_mm = y;
+      targets[i].speed_cms = speed;
+      targets[i].resolution_mm = resolution;
+      targets[i].distance_mm = distance;
+      targets[i].valid = distance > 0;
+
+      if (targets[i].valid) {
+        targetCount++;
+        if (nearestDistance == 0 || distance < nearestDistance) {
+          nearestDistance = distance;
+        }
+      }
+    }
+  }
