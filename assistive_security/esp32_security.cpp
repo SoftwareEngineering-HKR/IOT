@@ -268,4 +268,38 @@ void readPublishAndDisplayAllSensors200ms() {
     currentRadarDistanceMm = target.distance_mm;
     currentRadarSpeedCms = target.speed_cms;
   }
+
+  char radarDistanceId[72];
+  char radarSpeedId[72];
+
+  char radarDistanceTopic[80];
+  char radarSpeedTopic[80];
+
+  buildMetricId(radarBaseId, 'D', radarDistanceId, sizeof(radarDistanceId));
+  buildMetricId(radarBaseId, 'S', radarSpeedId, sizeof(radarSpeedId));
+
+  buildTopic("photo", radarDistanceId, radarDistanceTopic, sizeof(radarDistanceTopic));
+  buildTopic("motion", radarSpeedId, radarSpeedTopic, sizeof(radarSpeedTopic));
+
+  // ---------------------------------------------------------------------------
+  // RFID
+  // ---------------------------------------------------------------------------
+  unsigned long now = millis();
+
+  int rfidTouched = rfidDev.getReading();
+
+  if (rfidTouched == 1) {
+    rfidDoorOpen = true;
+    rfidDoorOpenUntil = now + RFID_UNLOCK_TIME_MS;
+  }
+
+  if (rfidDoorOpen && (long)(now - rfidDoorOpenUntil) >= 0) {
+    rfidDoorOpen = false;
+  }
+
+  currentRfidValue = rfidDoorOpen ? 1 : 0;
+
+  char rfidTopic[80];
+  rfidDev.getTopic(rfidTopic, sizeof(rfidTopic));
+
   
