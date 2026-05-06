@@ -299,3 +299,74 @@ private:
       }
     }
   }
+
+
+  
+
+  bool processRadarSerial() {
+    bool updated = false;
+
+    while (Serial1.available() > 0) {
+      uint8_t b = (uint8_t)Serial1.read();
+
+      if (pushRadarByte(b)) {
+        parseFrame();
+        lastFrameAt = millis();
+        hasReceivedFrame = true;
+        updated = true;
+      }
+    }
+
+    return updated;
+  }
+
+  void flushRadarSerial() {
+    while (Serial1.available() > 0) {
+      Serial1.read();
+    }
+  }
+
+  void printRawSampleIfAvailable() {
+    if (printedRawSample || rawSampleCount <= 0) {
+      return;
+    }
+
+    printedRawSample = true;
+    Serial.print("[radar] first raw bytes:");
+    for (int i = 0; i < rawSampleCount; i++) {
+      Serial.printf(" %02X", rawSample[i]);
+    }
+    Serial.println();
+  }
+
+  void printRadarDebugIfNeeded() {
+    unsigned long now = millis();
+
+    if ((unsigned long)(now - lastDebugPrintAt) < RADAR_DEBUG_PRINT_MS) {
+      return;
+    }
+
+    lastDebugPrintAt = now;
+
+    Serial.printf(
+      "[radar] status bytes=%lu frames=%lu bad=%lu targets=%d LD2450_RX_PIN=%d LD2450_TX_PIN=%d\n",
+      (unsigned long)bytesSeen,
+      (unsigned long)framesSeen,
+      (unsigned long)badFramesSeen,
+      targetCount,
+      ld2450RxPin,
+      ld2450TxPin
+    );
+
+    if (!hasReceivedFrame && bytesSeen > 0) {
+      printRawSampleIfAvailable();
+    }
+  }
+
+public:
+  RadarDevice(int configuredLd2450RxPin, int configuredLd2450TxPin)
+    : SecurityDevice("motion", configuredLd2450RxPin, RADAR_MAX_VALUE),
+      ld2450RxPin(configuredLd2450RxPin),
+      ld2450TxPin(configuredLd2450TxPin) {}
+
+      
