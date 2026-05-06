@@ -12,35 +12,32 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "/home/emperor/IOT/.pio/build/pico_w/firmware.elf",
-            "projectEnvName": "pico_w",
-            "toolchainBinDir": "/home/emperor/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "executable": "C:/Users/OMQU0001/Downloads/software/IOT-main/.pio/build/esp32s3/firmware.elf",
+            "projectEnvName": "esp32s3",
+            "toolchainBinDir": "C:/Users/OMQU0001/.platformio/packages/toolchain-xtensa-esp32s3/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "/home/emperor/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd/misc/svd/rp2040.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
-                "task": "Pre-Debug (pico_w)"
+                "task": "Pre-Debug"
             }
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "/home/emperor/IOT/.pio/build/pico_w/firmware.elf",
-            "projectEnvName": "pico_w",
-            "toolchainBinDir": "/home/emperor/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
-            "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "/home/emperor/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd/misc/svd/rp2040.svd"
+            "executable": "C:/Users/OMQU0001/Downloads/software/IOT-main/.pio/build/esp32s3/firmware.elf",
+            "projectEnvName": "esp32s3",
+            "toolchainBinDir": "C:/Users/OMQU0001/.platformio/packages/toolchain-xtensa-esp32s3/bin",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "/home/emperor/IOT/.pio/build/pico_w/firmware.elf",
-            "projectEnvName": "pico_w",
-            "toolchainBinDir": "/home/emperor/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "executable": "C:/Users/OMQU0001/Downloads/software/IOT-main/.pio/build/esp32s3/firmware.elf",
+            "projectEnvName": "esp32s3",
+            "toolchainBinDir": "C:/Users/OMQU0001/.platformio/packages/toolchain-xtensa-esp32s3/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "/home/emperor/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd/misc/svd/rp2040.svd",
             "loadMode": "manual"
         }
     ]
