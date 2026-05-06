@@ -41,3 +41,18 @@
 #define LD2450_RX_PIN 2
 #define LD2450_BAUD_RATE 256000
 
+
+// -----------------------------------------------------------------------------
+// Backend / transport settings
+// -----------------------------------------------------------------------------
+#define MQTT_BROKER_PORT 1883
+#define UDP_DISCOVERY_PORT 4444
+#define UDP_DISCOVERY_MESSAGE "NetworkDiscovery;Ver=1;"
+#define UDP_DISCOVERY_RESPONSE "DiscoveryResponse;"
+
+// Set to 1 if you want to bypass UDP discovery and use a fixed backend IP.
+#define USE_STATIC_SERVER_IP 1
+#define STATIC_SERVER_IP_1 192
+#define STATIC_SERVER_IP_2 168
+#define STATIC_SERVER_IP_3 50
+#define STATIC_SERVER_IP_4 130
