@@ -168,3 +168,68 @@ private:
   bool hasReceivedFrame = false;
 
   
+
+  uint32_t bytesSeen = 0;
+  uint32_t framesSeen = 0;
+  uint32_t badFramesSeen = 0;
+
+  uint8_t rawSample[RAW_SAMPLE_LEN];
+  int rawSampleCount = 0;
+  bool printedRawSample = false;
+
+  void clearTargets() {
+    targetCount = 0;
+    nearestDistance = 0;
+
+    for (int i = 0; i < TARGETS; i++) {
+      targets[i] = TargetInfo{};
+    }
+  }
+
+  static int16_t decodeSignedMag16(uint8_t lowByte, uint8_t highByte) {
+    int16_t value = ((highByte & 0x7F) << 8) | lowByte;
+    if ((highByte & 0x80) == 0) {
+      value = -value;
+    }
+    return value;
+  }
+
+  void resetFrameParser() {
+    frameIndex = 0;
+  }
+
+  void restartFrameParserWithByte(uint8_t b) {
+    if (b == 0xAA) {
+      frame[0] = b;
+      frameIndex = 1;
+    } else {
+      frameIndex = 0;
+    }
+  }
+
+  bool pushRadarByte(uint8_t b) {
+    bytesSeen++;
+
+    if (rawSampleCount < RAW_SAMPLE_LEN) {
+      rawSample[rawSampleCount++] = b;
+    }
+
+    if (frameIndex == 0) {
+      if (b == 0xAA) {
+        frame[0] = b;
+        frameIndex = 1;
+      }
+      return false;
+    }
+
+    if (frameIndex == 1) {
+      if (b == 0xFF) {
+        frame[1] = b;
+        frameIndex = 2;
+      } else {
+        restartFrameParserWithByte(b);
+      }
+      return false;
+    }
+
+    
