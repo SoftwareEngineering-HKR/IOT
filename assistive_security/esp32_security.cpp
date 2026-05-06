@@ -302,4 +302,45 @@ void readPublishAndDisplayAllSensors200ms() {
   char rfidTopic[80];
   rfidDev.getTopic(rfidTopic, sizeof(rfidTopic));
 
+
+
   
+
+  // ---------------------------------------------------------------------------
+  // Publish all values every 200 ms
+  // ---------------------------------------------------------------------------
+  publishIntTopic(rfidTopic, currentRfidValue);
+  publishIntTopic(lidarTopic, currentLidarMm);
+  publishIntTopic(radarBaseTopic, currentRadarPresence);
+  publishIntTopic(radarDistanceTopic, currentRadarDistanceMm);
+  publishIntTopic(radarSpeedTopic, currentRadarSpeedCms);
+
+  // ---------------------------------------------------------------------------
+  // Local serial table display
+  // ---------------------------------------------------------------------------
+  printSensorTableRow();
+}
+
+// -----------------------------------------------------------------------------
+// WiFi / discovery / MQTT
+// -----------------------------------------------------------------------------
+void connectWiFi() {
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  Serial.print("[wifi] Connecting to ");
+  Serial.println(WIFI_SSID);
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+
+  Serial.println();
+  Serial.print("[wifi] Connected IP: ");
+  Serial.println(WiFi.localIP());
+}
+
