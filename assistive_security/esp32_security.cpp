@@ -73,3 +73,54 @@ void extractDeviceIdFromTopic(const char* topic, char* idOut, size_t idOutSize) 
 void buildMetricId(const char* baseId, char suffix, char* out, size_t outSize) {
   snprintf(out, outSize, "%s%c", baseId, suffix);
 }
+
+
+
+void buildTopic(const char* type, const char* id, char* out, size_t outSize) {
+  snprintf(out, outSize, "%s/%s", type, id);
+}
+
+const char* radarMotionText(int speedCms, int presence) {
+  if (presence == 0) return "none";
+  if (speedCms < 0) return "approach";
+  if (speedCms > 0) return "away";
+  return "still";
+}
+
+int findNearestValidTargetIndex(RadarDevice* radar) {
+  int bestIndex = -1;
+  uint16_t bestDistance = 0;
+
+  for (int i = 0; i < 3; i++) {
+    const RadarDevice::TargetInfo& target = radar->getTarget(i);
+
+    if (!target.valid) {
+      continue;
+    }
+
+    if (bestIndex == -1 || target.distance_mm < bestDistance) {
+      bestIndex = i;
+      bestDistance = target.distance_mm;
+    }
+  }
+
+  return bestIndex;
+}
+
+// -----------------------------------------------------------------------------
+// Table display on ESP32 Serial Monitor
+// -----------------------------------------------------------------------------
+void printTableHeaderOnce() {
+  static bool printed = false;
+
+  if (printed) {
+    return;
+  }
+
+  Serial.println();
+  Serial.println("+------+----------+----------------+-------------------+-----------------+--------------+");
+  Serial.println("| RFID | LIDAR_mm | RADAR_presence | RADAR_distance_mm | RADAR_speed_cms | RADAR_motion |");
+  Serial.println("+------+----------+----------------+-------------------+-----------------+--------------+");
+
+  printed = true;
+}
