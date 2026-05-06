@@ -164,3 +164,66 @@ void publishRegisterPayload(const char* id, const char* type, int maxVal, int mi
   Serial.print(buffer);
   Serial.println(ok ? " OK" : " FAILED");
 }
+
+void registerDeviceFromTopic(SecurityDevice* device, const char* backendType, int maxVal, int minVal) {
+  char topic[80];
+  char id[64];
+
+  device->getTopic(topic, sizeof(topic));
+  extractDeviceIdFromTopic(topic, id, sizeof(id));
+
+  publishRegisterPayload(id, backendType, maxVal, minVal, true);
+}
+
+void registerRadarExtraMetrics() {
+  char radarBaseTopic[80];
+  char radarBaseId[64];
+
+  radarDev.getTopic(radarBaseTopic, sizeof(radarBaseTopic));
+  extractDeviceIdFromTopic(radarBaseTopic, radarBaseId, sizeof(radarBaseId));
+
+  char distanceId[72];
+  char speedId[72];
+
+  buildMetricId(radarBaseId, 'D', distanceId, sizeof(distanceId));
+  buildMetricId(radarBaseId, 'S', speedId, sizeof(speedId));
+
+  // Radar distance in mm.
+  publishRegisterPayload(distanceId, "photo", 6000, 0, true);
+
+  // Radar speed in cm/s.
+  publishRegisterPayload(speedId, "motion", 1000, -1000, true);
+
+  // Do NOT register radar status as "button".
+  // RFID is the only button device.
+}
+
+void registerAllDevicesForBackend() {
+  // LIDAR distance.
+  registerDeviceFromTopic(&lidarDev, "photo", LIDAR_MAX_VALUE, LIDAR_MIN_VALUE);
+
+  // RADAR presence.
+  registerDeviceFromTopic(&radarDev, "motion", 1, 0);
+
+  // RADAR distance and speed.
+  registerRadarExtraMetrics();
+
+  // RFID door button.
+  registerDeviceFromTopic(&rfidDev, "button", 1, 0);
+}
+
+// -----------------------------------------------------------------------------
+// MQTT publish
+// -----------------------------------------------------------------------------
+bool publishIntTopic(const char* topic, int value) {
+  if (!mqttClient.connected()) {
+    return false;
+  }
+
+  mqttClient.beginMessage(topic);
+  mqttClient.print(value);
+  bool ok = mqttClient.endMessage();
+
+  return ok;
+}
+
