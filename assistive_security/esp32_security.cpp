@@ -477,3 +477,64 @@ void setup() {
   Serial.println("================================");
 
   
+
+
+  pinMode(BOARD_LED_PIN, OUTPUT);
+  digitalWrite(BOARD_LED_PIN, LOW);
+  delay(300);
+  digitalWrite(BOARD_LED_PIN, HIGH);
+
+  // continue with your existing setup code below
+
+  // Serial.println();
+  // Serial.println("ESP32-S3 Security Monitor Starting...");
+
+  WiFi.mode(WIFI_STA);
+
+  // Keep your deployed I2C pins exactly:
+  // SDA = GPIO 5
+  // SCL = GPIO 6
+  Wire.begin(LIDAR_SDA_PIN, LIDAR_SCL_PIN);
+  Wire.setClock(400000);
+
+  lidarDev.init();
+  radarDev.init();
+  rfidDev.init();
+
+  connectWiFi();
+  discoverServer();
+  connectMqttAndRegister();
+}
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    unsigned long now = millis();
+
+    if (now - lastWifiAttemptAt >= WIFI_RECONNECT_INTERVAL_MS) {
+      lastWifiAttemptAt = now;
+      connectWiFi();
+    }
+
+    return;
+  }
+
+  if (!mqttClient.connected()) {
+    unsigned long now = millis();
+
+    if (now - lastMqttAttemptAt >= MQTT_RECONNECT_INTERVAL_MS) {
+      lastMqttAttemptAt = now;
+      connectMqttAndRegister();
+    }
+  }
+
+  if (mqttClient.connected()) {
+    mqttClient.poll();
+  }
+
+  unsigned long now = millis();
+
+  if (mqttClient.connected() && now - lastUpdateAt >= UPDATE_INTERVAL_MS) {
+    lastUpdateAt = now;
+    readPublishAndDisplayAllSensors200ms();
+  }
+}
