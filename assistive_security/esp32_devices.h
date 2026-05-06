@@ -370,3 +370,64 @@ public:
       ld2450TxPin(configuredLd2450TxPin) {}
 
       
+
+  void init() override {
+    assignDerivedMac(this->mac, 2);
+
+    resetFrameParser();
+    clearTargets();
+    hasReceivedFrame = false;
+    bytesSeen = 0;
+    framesSeen = 0;
+    badFramesSeen = 0;
+    rawSampleCount = 0;
+    printedRawSample = false;
+
+    Serial1.end();
+    delay(50);
+    Serial1.setRxBufferSize(2048);
+    Serial1.setTimeout(5);
+
+    Serial.printf(
+      "[radar] LD2450 UART begin baud=%d LD2450_RX_PIN=%d LD2450_TX_PIN=%d\n",
+      LD2450_BAUD_RATE,
+      ld2450RxPin,
+      ld2450TxPin
+    );
+
+    Serial1.begin(LD2450_BAUD_RATE, SERIAL_8N1, ld2450RxPin, ld2450TxPin);
+    delay(100);
+    flushRadarSerial();
+
+    lastFrameAt = millis();
+    lastDebugPrintAt = millis();
+  }
+
+  int getReading() override {
+    bool updated = processRadarSerial();
+
+    if (!updated) {
+      unsigned long now = millis();
+
+      if (!hasReceivedFrame || (unsigned long)(now - lastFrameAt) > RADAR_FRAME_STALE_TIMEOUT_MS) {
+        clearTargets();
+      }
+    }
+
+    printRadarDebugIfNeeded();
+    return targetCount;
+  }
+
+  int getTargetCount() const { return targetCount; }
+  uint16_t getNearestDistance() const { return nearestDistance; }
+  bool hasFrame() const { return hasReceivedFrame; }
+
+  const TargetInfo& getTarget(int index) const {
+    static TargetInfo emptyTarget{};
+    if (index < 0 || index >= TARGETS) {
+      return emptyTarget;
+    }
+    return targets[index];
+  }
+};
+
