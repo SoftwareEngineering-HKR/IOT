@@ -40,3 +40,36 @@ unsigned long lastMqttAttemptAt = 0;
 LidarDevice lidarDev(LIDAR_SDA_PIN);
 RadarDevice radarDev(LD2450_RX_PIN, LD2450_TX_PIN);
 RFIDDevice rfidDev(RC522_SDA_PIN);
+
+// -----------------------------------------------------------------------------
+// RFID door state
+// -----------------------------------------------------------------------------
+bool rfidDoorOpen = false;
+unsigned long rfidDoorOpenUntil = 0;
+
+// -----------------------------------------------------------------------------
+// Last values for table display
+// -----------------------------------------------------------------------------
+int currentRfidValue = 0;
+int currentLidarMm = 0;
+int currentRadarPresence = 0;
+int currentRadarDistanceMm = 0;
+int currentRadarSpeedCms = 0;
+
+// -----------------------------------------------------------------------------
+// Helper functions
+// -----------------------------------------------------------------------------
+void extractDeviceIdFromTopic(const char* topic, char* idOut, size_t idOutSize) {
+  const char* slash = strchr(topic, '/');
+
+  if (!slash) {
+    snprintf(idOut, idOutSize, "%s", topic);
+    return;
+  }
+
+  snprintf(idOut, idOutSize, "%s", slash + 1);
+}
+
+void buildMetricId(const char* baseId, char suffix, char* out, size_t outSize) {
+  snprintf(out, outSize, "%s%c", baseId, suffix);
+}
