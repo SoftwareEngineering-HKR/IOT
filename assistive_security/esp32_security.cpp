@@ -227,3 +227,45 @@ bool publishIntTopic(const char* topic, int value) {
   return ok;
 }
 
+// -----------------------------------------------------------------------------
+// Read sensors and publish every 200 ms
+// -----------------------------------------------------------------------------
+void readPublishAndDisplayAllSensors200ms() {
+  // ---------------------------------------------------------------------------
+  // LIDAR
+  // ---------------------------------------------------------------------------
+  int lidarReading = lidarDev.getReading();
+
+  if (lidarReading < 0) {
+    lidarReading = 0;
+  }
+
+  currentLidarMm = lidarReading;
+
+  char lidarTopic[80];
+  lidarDev.getTopic(lidarTopic, sizeof(lidarTopic));
+
+  // ---------------------------------------------------------------------------
+  // RADAR
+  // ---------------------------------------------------------------------------
+  radarDev.getReading();
+
+  char radarBaseTopic[80];
+  char radarBaseId[64];
+
+  radarDev.getTopic(radarBaseTopic, sizeof(radarBaseTopic));
+  extractDeviceIdFromTopic(radarBaseTopic, radarBaseId, sizeof(radarBaseId));
+
+  currentRadarPresence = radarDev.getTargetCount() > 0 ? 1 : 0;
+  currentRadarDistanceMm = 0;
+  currentRadarSpeedCms = 0;
+
+  int bestTargetIndex = findNearestValidTargetIndex(&radarDev);
+
+  if (bestTargetIndex >= 0) {
+    const RadarDevice::TargetInfo& target = radarDev.getTarget(bestTargetIndex);
+
+    currentRadarDistanceMm = target.distance_mm;
+    currentRadarSpeedCms = target.speed_cms;
+  }
+  
