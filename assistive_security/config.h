@@ -65,3 +65,20 @@
 #define WIFI_RECONNECT_INTERVAL_MS 10000UL
 #define DISCOVERY_RETRY_INTERVAL_MS 2000UL
 #define RADAR_DEBUG_PRINT_MS 10000UL
+
+// -----------------------------------------------------------------------------
+// Sensor ranges used for backend registration
+// -----------------------------------------------------------------------------
+
+
+#define LIDAR_MIN_VALUE 0
+#define LIDAR_MAX_VALUE 9000
+
+#define RADAR_MIN_VALUE 0
+#define RADAR_MAX_VALUE 3
+
+
+#define RFID_MIN_VALUE 0
+#define RFID_MAX_VALUE 1
+
+
