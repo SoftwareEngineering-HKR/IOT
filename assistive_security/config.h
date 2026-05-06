@@ -27,3 +27,17 @@
 
 #define AUTHORIZED_RFID_UID "EA:A3:75:DC"
 
+
+
+// IMPORTANT:
+// The MFRC522 I2C library expects a real reset GPIO when PCD_Init() is called.
+// If your RC522 RST pin is NOT wired to the ESP32, keep this at -1 and RFID will
+// be skipped safely instead of throwing an invalid-pin error at boot.
+#define RC522_RST_PIN -1
+
+#define ENABLE_RFID 1
+
+#define LD2450_TX_PIN 1
+#define LD2450_RX_PIN 2
+#define LD2450_BAUD_RATE 256000
+
