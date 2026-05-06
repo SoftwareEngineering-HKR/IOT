@@ -431,3 +431,100 @@ public:
   }
 };
 
+
+// -----------------------------------------------------------------------------
+// RFID RC522 over I2C
+// -----------------------------------------------------------------------------
+class RFIDDevice : public SecurityDevice {
+private:
+  char lastUid[32];
+
+  void clearUid() {
+    lastUid[0] = '\0';
+  }
+
+  void buildUidString(char* buffer, size_t size) {
+    buffer[0] = '\0';
+    size_t offset = 0;
+
+    for (byte i = 0; i < rfid.uid.size && offset + 3 < size; i++) {
+      int written = snprintf(buffer + offset, size - offset, "%02X", rfid.uid.uidByte[i]);
+      if (written <= 0) {
+        break;
+      }
+
+      offset += written;
+
+      if (i < rfid.uid.size - 1 && offset + 2 < size) {
+        buffer[offset++] = ':';
+        buffer[offset] = '\0';
+      }
+    }
+  }
+
+  bool isAuthorizedUid(const char* uid) {
+    return strcmp(uid, AUTHORIZED_RFID_UID) == 0;
+  }
+
+public:
+  explicit RFIDDevice(int rfidPin)
+    : SecurityDevice("button", rfidPin, RFID_MAX_VALUE) {
+    clearUid();
+  }
+
+  void init() override {
+    assignDerivedMac(this->mac, 3);
+
+#if ENABLE_RFID
+    pinMode(C3_LED_PIN, OUTPUT);
+    digitalWrite(C3_LED_PIN, HIGH);
+
+    Serial.println("[rfid] Initializing RC522 I2C on shared SDA/SCL...");
+    rfid.PCD_Init();
+    delay(50);
+    Serial.println("[rfid] RC522 I2C init done");
+#else
+    Serial.println("[rfid] Disabled by ENABLE_RFID=0");
+#endif
+  }
+
+  int getReading() override {
+#if ENABLE_RFID
+    if (!rfid.PICC_IsNewCardPresent()) {
+      return 0;
+    }
+
+    if (!rfid.PICC_ReadCardSerial()) {
+      Serial.println("[rfid] Card present but UID read failed");
+      return 0;
+    }
+
+    buildUidString(lastUid, sizeof(lastUid));
+
+    Serial.print("[rfid] Key fob/card detected UID: ");
+    Serial.println(lastUid);
+
+    bool authorized = isAuthorizedUid(lastUid);
+
+    rfid.PICC_HaltA();
+    rfid.PCD_StopCrypto1();
+
+    if (authorized) {
+      Serial.println("[rfid] Access granted");
+      digitalWrite(C3_LED_PIN, LOW);
+      delay(20);
+      digitalWrite(C3_LED_PIN, HIGH);
+      return 1;
+    }
+
+    Serial.println("[rfid] Access denied");
+#endif
+    return 0;
+  }
+
+  const char* getLastUid() const {
+    return lastUid;
+  }
+};
+
+
