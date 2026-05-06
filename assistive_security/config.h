@@ -56,3 +56,12 @@
 #define STATIC_SERVER_IP_2 168
 #define STATIC_SERVER_IP_3 50
 #define STATIC_SERVER_IP_4 130
+
+// -----------------------------------------------------------------------------
+// Publish behaviour
+// -----------------------------------------------------------------------------
+#define SENSOR_PUBLISH_INTERVAL_MS 300UL
+#define MQTT_RECONNECT_INTERVAL_MS 5000UL
+#define WIFI_RECONNECT_INTERVAL_MS 10000UL
+#define DISCOVERY_RETRY_INTERVAL_MS 2000UL
+#define RADAR_DEBUG_PRINT_MS 10000UL
