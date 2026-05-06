@@ -344,3 +344,44 @@ void connectWiFi() {
   Serial.println(WiFi.localIP());
 }
 
+
+
+
+void discoverServer() {
+#if USE_STATIC_SERVER_IP
+  serverIP = IPAddress(
+    STATIC_SERVER_IP_1,
+    STATIC_SERVER_IP_2,
+    STATIC_SERVER_IP_3,
+    STATIC_SERVER_IP_4
+  );
+
+  serverFound = true;
+
+  Serial.print("[server] Using static backend IP: ");
+  Serial.println(serverIP);
+#else
+  Serial.println("[server] Discovering backend with UDP broadcast...");
+  udp.begin(UDP_DISCOVERY_PORT);
+
+  while (!serverFound) {
+    Serial.println("[server] Sending discovery packet...");
+
+    udp.beginPacket(IPAddress(255, 255, 255, 255), UDP_DISCOVERY_PORT);
+    udp.print(UDP_DISCOVERY_MESSAGE);
+    udp.endPacket();
+
+    unsigned long start = millis();
+
+    while (millis() - start < DISCOVERY_RETRY_INTERVAL_MS) {
+      int packetSize = udp.parsePacket();
+
+      if (packetSize > 0) {
+        char response[64];
+        int n = udp.read(response, sizeof(response) - 1);
+
+        if (n > 0) {
+          response[n] = '\0';
+
+          Serial.print("[server] UDP response: ");
+          Serial.println(response);
