@@ -22,14 +22,20 @@ void binaryReciver(const char* msg, int pin){
   }
 }
 
+int percentigeConverter(int reading){
+  return map(reading, 0, 1023, 0, 100);
+}
+
+
+
 DigitalSensorDevice motion( 2, "motion");
 DigitalSensorDevice button1(4, "button");
 DigitalSensorDevice button2( 8, "button");
 
-AnalogSensorDevice gas( A0, "gas");
-AnalogSensorDevice photo( A1, "photo");
-AnalogSensorDevice steam( A2, "steam");
-AnalogSensorDevice humidity( A3, "humidity");
+AnalogSensorDevice gas( A0, "gas", percentigeConverter);
+AnalogSensorDevice photo( A1, "photo", percentigeConverter);
+AnalogSensorDevice steam( A2, "steam", percentigeConverter);
+AnalogSensorDevice humidity( A3, "humidity", percentigeConverter);
 
 ReciverDevice buzzer( 3, "buzz", playMusic);
 ReciverDevice light1( 13, "light", binaryReciver);

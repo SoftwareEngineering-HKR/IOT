@@ -17,10 +17,14 @@ DigitalSensorDevice::DigitalSensorDevice(int pin, const char* type)
 int DigitalSensorDevice::getReading(){ return digitalRead(pin); }
 
 // generic analog sensor
-AnalogSensorDevice::AnalogSensorDevice(int pin, const char* type)
-: SensorDevice(pin, type, 1023){}
+AnalogSensorDevice::AnalogSensorDevice(int pin, const char* type, int(*converter)(int))
+: SensorDevice(pin, type, 100), converter(converter){}
 
-int AnalogSensorDevice::getReading(){ return analogRead(pin); }
+int AnalogSensorDevice::getReading(){ 
+  int reading = analogRead(pin);
+  int tranformedReading = converter(reading); 
+  return tranformedReading; 
+}
 
 // generic reciver device
 ReciverDevice::ReciverDevice(int pin, const char* type, void(*proc)(const char*, int))
