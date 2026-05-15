@@ -16,8 +16,9 @@ class DigitalSensorDevice: public SensorDevice{
 };
 
 class AnalogSensorDevice: public SensorDevice{
+  int (*converter)(int reading);
   public:
-    AnalogSensorDevice( int pin, const char* type);
+    AnalogSensorDevice( int pin, const char* type, int(*converter)(int));
     int getReading() override;
 };
 

@@ -6,20 +6,15 @@
 #include <DHT.h>
 #include "config.h" 
 #include "pico_devices.h" 
-#include "bluetooth_service.h"
 
 
 #define DHT_TYPE DHT11
-#define BLE_PIN 2
 DHT dhtSensor(DHT_PIN, DHT_TYPE);
 
 // MQTT
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
 WiFiUDP udp;
-
-// Bluetooth
-BluetoothService ble;
 
 // Server discovery
 const int UDP_PORT = 1883; 
@@ -80,11 +75,12 @@ void connectMQTTAndRegister() {
   // Use the `getRegistration` method from the Device class
   char buffer[128];
   for (int i = 0; i < deviceCount; i++) {
-    myDevices[i]->getRegistration(buffer);
-    
-    mqttClient.beginMessage("registration");
-    mqttClient.print(buffer);
-    mqttClient.endMessage();
+
+      mqttClient.beginMessage("registration");
+
+      myDevices[i]->getRegistration(mqttClient);
+
+      mqttClient.endMessage();
   }
 }
 void checkAndAlertDiscord(int t, int h, int l, int tilt) {
@@ -118,11 +114,6 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  ble.init();
-
-  pinMode(BLE_PIN, OUTPUT);
-  digitalWrite(BLE_PIN, LOW);
-
   pinMode(TILT_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
   analogReadResolution(16);
@@ -135,13 +126,10 @@ void setup() {
   }
 
   connectWiFi();
-  // discoverServer();
-  // connectMQTTAndRegister();
+  discoverServer();
+  connectMQTTAndRegister();
 }
 void loop() {
-
-  ble.loop();
-
   if (serverFound && !mqttClient.connected()) {
     connectMQTTAndRegister();
   }
@@ -174,8 +162,7 @@ void loop() {
     int l    = lightDev.getReading();
     int tilt = tiltDev.getReading();
 
-    // digitalWrite(LED_PIN, tilt == 1 ? HIGH : LOW);
+    digitalWrite(LED_PIN, tilt == 1 ? HIGH : LOW);
     checkAndAlertDiscord(t, h, l, tilt);
   }
-  delay(10);
 }
