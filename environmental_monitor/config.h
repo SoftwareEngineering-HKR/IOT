@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 // Wi-Fi credentials
-#define WIFI_SSID "Emperor"
+#define WIFI_SSID ""
 #define WIFI_PASSWORD ""
 
 // Discord Webhook
