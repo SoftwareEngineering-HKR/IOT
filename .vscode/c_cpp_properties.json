@@ -10,7 +10,6 @@
             "includePath": [
                 "/home/emperor/IOT/include",
                 "/home/emperor/IOT/src",
-                "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HTTPClient/src",
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/WiFi/src",
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/Updater/src",
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/PicoOTA/src",
@@ -123,6 +122,7 @@
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HID_Joystick/src",
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HID_Keyboard/src",
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HID_Mouse/src",
+                "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HTTPClient/src",
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HTTPUpdate/src",
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HTTPUpdateServer/src",
                 "/home/emperor/.platformio/packages/framework-arduinopico/libraries/Hash/src",
@@ -177,7 +177,6 @@
                 "path": [
                     "/home/emperor/IOT/include",
                     "/home/emperor/IOT/src",
-                    "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HTTPClient/src",
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/WiFi/src",
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/Updater/src",
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/PicoOTA/src",
@@ -290,6 +289,7 @@
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HID_Joystick/src",
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HID_Keyboard/src",
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HID_Mouse/src",
+                    "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HTTPClient/src",
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HTTPUpdate/src",
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/HTTPUpdateServer/src",
                     "/home/emperor/.platformio/packages/framework-arduinopico/libraries/Hash/src",
