@@ -5,8 +5,6 @@
 #define WIFI_SSID "Emperor"
 #define WIFI_PASSWORD ""
 
-// Discord Webhook
-#define DISCORD_WEBHOOK_URL "https://discord.com/api/webhooks/*****"
 
 // Thresholds
 #define TEMP_THRESHOLD 30
