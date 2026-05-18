@@ -2,11 +2,9 @@
 #define CONFIG_H
 
 // Wi-Fi credentials
-#define WIFI_SSID ""
+#define WIFI_SSID "Emperor"
 #define WIFI_PASSWORD ""
 
-// Discord Webhook
-#define DISCORD_WEBHOOK_URL "https://discord.com/api/webhooks/*****"
 
 // Thresholds
 #define TEMP_THRESHOLD 30
@@ -20,6 +18,3 @@
 #define LED_PIN 13
 
 #endif
-
-#define SERVICE_UUID        "12345678-1234-5678-1234-56789abcdef0"
-#define CHARACTERISTIC_UUID "12345678-1234-5678-1234-56789abcdef1"
