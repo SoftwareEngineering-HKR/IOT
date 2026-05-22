@@ -93,7 +93,7 @@ inline void assignDerivedMac(uint8_t outMac[6], uint8_t offset) {
 class LidarDevice : public SecurityDevice {
 public:
   explicit LidarDevice(int lidarPin)
-    : SecurityDevice("photo", lidarPin, LIDAR_MAX_VALUE) {}
+    : SecurityDevice("distance", lidarPin, LIDAR_MAX_VALUE) {}
 
   void init() override {
     assignDerivedMac(this->mac, 1);

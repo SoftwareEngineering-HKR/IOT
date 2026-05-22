@@ -183,16 +183,16 @@ void registerRadarExtraMetrics() {
   extractDeviceIdFromTopic(radarBaseTopic, radarBaseId, sizeof(radarBaseId));
 
   char distanceId[72];
-  char speedId[72];
+  // char speedId[72]; disbaled for speed
 
   buildMetricId(radarBaseId, 'D', distanceId, sizeof(distanceId));
-  buildMetricId(radarBaseId, 'S', speedId, sizeof(speedId));
+  // buildMetricId(radarBaseId, 'S', speedId, sizeof(speedId));  disbaled for speed
 
   // Radar distance in mm.
-  publishRegisterPayload(distanceId, "photo", 6000, 0, true);
+  publishRegisterPayload(distanceId, "distance", 6000, 0, true);
 
   // Radar speed in cm/s.
-  publishRegisterPayload(speedId, "motion", 1000, -1000, true);
+  // publishRegisterPayload(speedId, "motion", 1000, -1000, true);  disbaled for speed
 
   // Do NOT register radar status as "button".
   // RFID is the only button device.
@@ -200,7 +200,7 @@ void registerRadarExtraMetrics() {
 
 void registerAllDevicesForBackend() {
   // LIDAR distance.
-  registerDeviceFromTopic(&lidarDev, "photo", LIDAR_MAX_VALUE, LIDAR_MIN_VALUE);
+  registerDeviceFromTopic(&lidarDev, "distance", LIDAR_MAX_VALUE, LIDAR_MIN_VALUE);
 
   // RADAR presence.
   registerDeviceFromTopic(&radarDev, "motion", 1, 0);
@@ -270,16 +270,16 @@ void readPublishAndDisplayAllSensors200ms() {
   }
 
   char radarDistanceId[72];
-  char radarSpeedId[72];
+  // char radarSpeedId[72]; char radarSpeedTopic[80];
 
   char radarDistanceTopic[80];
-  char radarSpeedTopic[80];
+  // char radarSpeedTopic[80];  char radarSpeedTopic[80];
 
   buildMetricId(radarBaseId, 'D', radarDistanceId, sizeof(radarDistanceId));
-  buildMetricId(radarBaseId, 'S', radarSpeedId, sizeof(radarSpeedId));
+  // buildMetricId(radarBaseId, 'S', radarSpeedId, sizeof(radarSpeedId));  disbaled for speed
 
-  buildTopic("photo", radarDistanceId, radarDistanceTopic, sizeof(radarDistanceTopic));
-  buildTopic("motion", radarSpeedId, radarSpeedTopic, sizeof(radarSpeedTopic));
+  buildTopic("distance", radarDistanceId, radarDistanceTopic, sizeof(radarDistanceTopic));
+  // buildTopic("motion", radarSpeedId, radarSpeedTopic, sizeof(radarSpeedTopic));  disbaled for speed
 
   // ---------------------------------------------------------------------------
   // RFID
@@ -313,7 +313,7 @@ void readPublishAndDisplayAllSensors200ms() {
   publishIntTopic(lidarTopic, currentLidarMm);
   publishIntTopic(radarBaseTopic, currentRadarPresence);
   publishIntTopic(radarDistanceTopic, currentRadarDistanceMm);
-  publishIntTopic(radarSpeedTopic, currentRadarSpeedCms);
+  // publishIntTopic(radarSpeedTopic, currentRadarSpeedCms);  disabled for speed
 
   // ---------------------------------------------------------------------------
   // Local serial table display

@@ -3,8 +3,8 @@
 // -----------------------------------------------------------------------------
 // Wi-Fi configuration
 // -----------------------------------------------------------------------------
-#define WIFI_SSID "***"
-#define WIFI_PASSWORD "***"
+#define WIFI_SSID "Andriod"
+#define WIFI_PASSWORD "password"
 
 
 // -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@
 #define UDP_DISCOVERY_RESPONSE "DiscoveryResponse;"
 
 // Set to 1 if you want to bypass UDP discovery and use a fixed backend IP.
-#define USE_STATIC_SERVER_IP 1
+#define USE_STATIC_SERVER_IP 0
 #define STATIC_SERVER_IP_1 192
 #define STATIC_SERVER_IP_2 168
 #define STATIC_SERVER_IP_3 50
@@ -60,7 +60,7 @@
 // -----------------------------------------------------------------------------
 // Publish behaviour
 // -----------------------------------------------------------------------------
-#define SENSOR_PUBLISH_INTERVAL_MS 300UL
+#define SENSOR_PUBLISH_INTERVAL_MS 1000UL
 #define MQTT_RECONNECT_INTERVAL_MS 5000UL
 #define WIFI_RECONNECT_INTERVAL_MS 10000UL
 #define DISCOVERY_RETRY_INTERVAL_MS 2000UL
