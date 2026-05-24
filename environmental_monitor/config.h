@@ -5,7 +5,6 @@
 #define WIFI_SSID "Emperor"
 #define WIFI_PASSWORD ""
 
-
 // Thresholds
 #define TEMP_THRESHOLD 30
 #define HUMIDITY_THRESHOLD 80

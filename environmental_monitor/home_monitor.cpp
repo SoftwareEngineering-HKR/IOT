@@ -83,7 +83,7 @@ void registerSensor(String suffix, String type, float minVal, float maxVal) {
 
 void connectMQTTAndRegister() {
   Serial.print("Connecting to MQTT broker...");
-  if (!mqttClient.connect("192.168.1.2", 1883)) {
+  if (!mqttClient.connect(serverIP, 1883)) {
     Serial.println("Failed! Error code = " + String(mqttClient.connectError()));
     return;
   }
